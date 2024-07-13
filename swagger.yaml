@@ -365,8 +365,21 @@ paths:
   /users/{userId}/dashboard:
     get:
       summary: Get User Dashboard
+      description: |
+        Retrieves the dashboard data for a specific user. This endpoint requires authentication,
+        and users can only access their own dashboard data. The user ID in the path must match
+        the ID of the authenticated user.
       tags:
         - Users
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user whose dashboard is being requested
+      security:
+        - BearerAuth: []
       responses:
         '200':
           description: Successful response
@@ -381,6 +394,14 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/RandomData'
+        '401':
+          description: Unauthorized - Invalid or missing token
+        '403':
+          description: Forbidden - Token does not match the requested user ID
+        '404':
+          description: Not Found - User not found
+
+
   /users/{userId}/data-export:
     post:
       summary: Request User Data Export
@@ -392,6 +413,15 @@ paths:
         includes a job ID that can be used to check the export status later.
       tags:
         - Users
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user whose data is to be exported
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -446,10 +476,19 @@ paths:
         - Users
       parameters:
         - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+          description: The ID of the user whose data is requested
+        - in: path
           name: job_id
           required: true
           schema:
-            type: integer
+            type: string
+          description: The ID of the requested job export
+      security:
+        - BearerAuth: []
       responses:
         '200':
           description: Export job status and data
@@ -470,6 +509,15 @@ paths:
       summary: Get Chart Data
       tags:
         - Users
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+          description: The ID of the user whose data-chart is requested
+      security:
+        - BearerAuth: []
       responses:
         '200':
           description: Successful response
@@ -1399,3 +1447,4 @@ components:
                 type: array
                 items:
                   type: number
+
