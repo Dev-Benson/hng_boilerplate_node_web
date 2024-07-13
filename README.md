@@ -1,5 +1,5 @@
-
 ## Api & DB Design
+Repo containing api design following openAPI's guides
 
 [Description]
 
