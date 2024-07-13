@@ -12,7 +12,8 @@
   "devDependencies": {
     "js-yaml": "^4.1.0",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "widdershins": "^4.0.1"
   },
   "keywords": [],
   "author": "",

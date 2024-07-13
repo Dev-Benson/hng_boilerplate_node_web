@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: API for managing users
 servers:
-  - url: {baseUrl}/api/v1
+  - url: "{baseUrl}/api/v1"
     description: API server
     variables:
       baseUrl:
@@ -15,7 +15,7 @@ servers:
           - https://dev.host-api-domain.com  # Development
           - http://localhost:3000  # Local development
 paths:
-  auth/signup:
+  /auth/signup:
     post:
       summary: Create a new user
       description: Add a new user to the system
@@ -34,7 +34,7 @@ paths:
                 $ref: '#/components/schemas/User'
         '400':
           description: Invalid input
-  auth/login:
+  /auth/login:
     post:
       summary: User login
       description: Logs in an existing user
@@ -71,7 +71,6 @@ paths:
       responses:
         '200':
           description: Password reset email sent
-
   /auth/reset-password:
     post:
       summary: Reset password
@@ -93,7 +92,6 @@ paths:
       responses:
         '200':
           description: Password reset successful
-
   /auth/change-password:
     post:
       summary: Change password
@@ -118,7 +116,6 @@ paths:
       responses:
         '200':
           description: Password changed successfully
-
   /invites:
     post:
       summary: Create an invite
@@ -143,7 +140,6 @@ paths:
       responses:
         '201':
           description: Invite created successfully
-
   /invites/{inviteId}/accept:
     post:
       summary: Accept an invite
@@ -168,8 +164,7 @@ paths:
       responses:
         '200':
           description: Invite accepted successfully
-
-  /organizations: #Create organizations
+  /organizations:
     post:
       summary: Create an organization
       security:
@@ -183,8 +178,7 @@ paths:
       responses:
         '201':
           description: Organization created successfully
-
-    get: # get paginated org list
+    get:
       summary: List organizations
       security:
         - BearerAuth: []
@@ -221,8 +215,7 @@ paths:
                     type: integer
                   totalPages:
                     type: integer
-
-  /organizations/{orgId}: # get a single org
+  /organizations/{orgId}:
     get:
       summary: Get an organization
       security:
@@ -240,8 +233,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Organization'
-
-    put: # update org
+    put:
       summary: Update an organization
       security:
         - BearerAuth: []
@@ -260,8 +252,7 @@ paths:
       responses:
         '200':
           description: Organization updated successfully
-
-    delete: # delete organization
+    delete:
       summary: Delete an organization
       security:
         - BearerAuth: []
@@ -274,8 +265,7 @@ paths:
       responses:
         '204':
           description: Organization deleted successfully
-
-  /email/send: #emails
+  /email/send:
     post:
       summary: Send an email
       security:
@@ -357,7 +347,6 @@ paths:
                     type: integer
                   totalPages:
                     type: integer
-
   /settings/language:
     put:
       summary: Update language preference
@@ -377,7 +366,6 @@ paths:
       responses:
         '200':
           description: Language preference updated successfully
-
   /settings/region:
     put:
       summary: Update region preference
@@ -397,7 +385,6 @@ paths:
       responses:
         '200':
           description: Region preference updated successfully
-
   /settings:
     get:
       summary: Get user settings
@@ -410,7 +397,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserSettings'
-
     put:
       summary: Update user settings
       security:
@@ -424,7 +410,6 @@ paths:
       responses:
         '200':
           description: User settings updated successfully
-
   /notifications:
     post:
       summary: Send a notification
@@ -444,16 +429,11 @@ paths:
                   type: string
                 message:
                   type: string
-                type:
-                  type: string
-                  enum: [info, warning, error]
-                  default: info
       responses:
-        '201':
+        '200':
           description: Notification sent successfully
-
     get:
-      summary: Get user notifications
+      summary: Get notifications
       security:
         - BearerAuth: []
       parameters:
@@ -467,11 +447,6 @@ paths:
           schema:
             type: integer
             default: 10
-        - in: query
-          name: unreadOnly
-          schema:
-            type: boolean
-            default: false
       responses:
         '200':
           description: List of notifications
@@ -490,325 +465,34 @@ paths:
                     type: integer
                   totalPages:
                     type: integer
-
-  /search:
-    get:
-      summary: Search across multiple entities
-      security:
-        - BearerAuth: []
-      parameters:
-        - in: query
-          name: q
-          required: true
-          schema:
-            type: string
-        - in: query
-          name: entities
-          schema:
-            type: array
-            items:
-              type: string
-              enum: [users, organizations, products]
-        - in: query
-          name: page
-          schema:
-            type: integer
-            default: 1
-        - in: query
-          name: limit
-          schema:
-            type: integer
-            default: 10
-      responses:
-        '200':
-          description: Search results
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  results:
-                    type: array
-                    items:
-                      type: object
-                  totalCount:
-                    type: integer
-                  currentPage:
-                    type: integer
-                  totalPages:
-                    type: integer
-
-  /exports:
-    post:
-      summary: Request data export
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - dataType
-              properties:
-                dataType:
-                  type: string
-                  enum: [users, organizations, transactions]
-                dateRange:
-                  type: object
-                  properties:
-                    start:
-                      type: string
-                      format: date
-                    end:
-                      type: string
-                      format: date
-      responses:
-        '202':
-          description: Export job created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  jobId:
-                    type: string
-
-  /exports/{jobId}:
-    get:
-      summary: Get export job status
-      security:
-        - BearerAuth: []
-      parameters:
-        - in: path
-          name: jobId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Export job status
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    enum: [pending, processing, completed, failed]
-                  downloadUrl:
-                    type: string
-
-  /payments:
-    post:
-      summary: Create a payment
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PaymentRequest'
-      responses:
-        '201':
-          description: Payment created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Payment'
-
-  /payments/{paymentId}:
-    get:
-      summary: Get payment details
-      security:
-        - BearerAuth: []
-      parameters:
-        - in: path
-          name: paymentId
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Payment details
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Payment'
-
-  /admin/users:
-    get:
-      summary: List all users (admin only)
-      security:
-        - BearerAuth: []
-      parameters:
-        - in: query
-          name: page
-          schema:
-            type: integer
-            default: 1
-        - in: query
-          name: limit
-          schema:
-            type: integer
-            default: 10
-      responses:
-        '200':
-          description: List of users
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  users:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/User'
-                  totalCount:
-                    type: integer
-                  currentPage:
-                    type: integer
-                  totalPages:
-                    type: integer
-
-  /admin/users/{userId}:
-    put:
-      summary: Update user (admin only)
-      security:
-        - BearerAuth: []
-      parameters:
-        - in: path
-          name: userId
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/User'
-      responses:
-        '200':
-          description: User updated successfully
-
-  /dashboard/stats:
-    get:
-      summary: Get dashboard statistics
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          description: Dashboard statistics
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  totalUsers:
-                    type: integer
-                  totalOrganizations:
-                    type: integer
-                  totalRevenue:
-                    type: number
-                  activeUsers:
-                    type: integer
-
-  /dashboard/charts/user-growth:
-    get:
-      summary: Get user growth chart data
-      security:
-        - BearerAuth: []
-      parameters:
-        - in: query
-          name: period
-          schema:
-            type: string
-            enum: [week, month, year]
-            default: month
-      responses:
-        '200':
-          description: User growth chart data
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  labels:
-                    type: array
-                    items:
-                      type: string
-                  data:
-                    type: array
-                    items:
-                      type: integer
-# AI integration
-  /ai/text-analysis:
-    post:
-      summary: Analyze text using AI
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - text
-              properties:
-                text:
-                  type: string
-      responses:
-        '200':
-          description: Text analysis results
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TextAnalysisResult'
-
-  /ai/content-generation:
-    post:
-      summary: Generate content using AI
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - prompt
-              properties:
-                prompt:
-                  type: string
-                maxLength:
-                  type: integer
-      responses:
-        '200':
-          description: Generated content
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  content:
-                    type: string
-
 components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     NewUser:
       type: object
       required:
-        - username
+        - name
         - email
         - password
       properties:
-        username:
+        name:
           type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    LoginCredentials:
+      type: object
+      required:
+        - email
+        - password
+      properties:
         email:
           type: string
           format: email
@@ -820,36 +504,16 @@ components:
       properties:
         id:
           type: string
-        email:
-          type: string
         name:
           type: string
-        role:
+        email:
           type: string
-          enum: [user, admin]
-        createdAt:
-          type: string
-          format: date-time
-    LoginCredentials:
-      type: object
-      required:
-        - username
-        - password
-      properties:
-        username:
-          type: string
-        password:
-          type: string
-          format: password
+          format: email
     UserResponse:
       type: object
       properties:
-        id:
-          type: integer
-        username:
-          type: string
-        email:
-          type: string
+        user:
+          $ref: '#/components/schemas/User'
         token:
           type: string
     Organization:
@@ -861,14 +525,6 @@ components:
           type: string
         name:
           type: string
-        description:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
     ActivityLog:
       type: object
       properties:
@@ -878,28 +534,15 @@ components:
           type: string
         action:
           type: string
-        details:
-          type: object
         timestamp:
           type: string
           format: date-time
     UserSettings:
       type: object
       properties:
-        userId:
-          type: string
         languageCode:
           type: string
         regionCode:
-          type: string
-        emailNotifications:
-          type: boolean
-        pushNotifications:
-          type: boolean
-        theme:
-          type: string
-          enum: [light, dark]
-        timezone:
           type: string
     Notification:
       type: object
@@ -910,12 +553,7 @@ components:
           type: string
         message:
           type: string
-        type:
-          type: string
-          enum: [info, warning, error]
-        read:
-          type: boolean
-        createdAt:
+        timestamp:
           type: string
           format: date-time
     PaymentRequest:
