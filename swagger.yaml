@@ -22,18 +22,14 @@ tags:
     description: AI Text Analysis endpoints
   - name: Activity-logs
     description: Activity-logs endpoints
+  - name: Admin
+    description: Admin endpoints
 servers:
   - url: "{baseUrl}/api/v1"
     description: Boilerplate Api server
     variables:
       baseUrl:
-        default: https://host-api-domain.com
-        description: Authentication
-        enum:
-          - https://host-api-domain.com  # Production
-          - https://staging.host-api-domain.com  # Staging
-          - https://dev.host-api-domain.com  # Development
-          - http://localhost:3000  # Local development
+        default: ${API_URL}
 
 paths:
   /auth/signup:
@@ -332,7 +328,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserResponse'
     put:
       summary: Update user details
       security:
@@ -348,7 +344,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserResponse'
       responses:
         '200':
           description: User updated successfully
@@ -365,6 +361,122 @@ paths:
       responses:
         '204':
           description: User deleted successfully
+
+  /users/{userId}/dashboard:
+    get:
+      summary: Get User Dashboard
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserDetails'
+                  random_data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RandomData'
+  /users/{userId}/data-export:
+    post:
+      summary: Request User Data Export
+      description: |
+        Initiates a data export process for the authenticated user.
+        This endpoint allows users to request an export of their personal data,
+        including user details, settings, associated organizations, payment history,
+        and activity logs. The export is processed asynchronously, and the response
+        includes a job ID that can be used to check the export status later.
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data_types:
+                  type: array
+                  description: Types of data to include in the export. If empty, all types will be included.
+                  items:
+                    type: string
+                    enum: [user_details, user_settings, organisations, payments, activity_logs]
+                date_range:
+                  type: object
+                  properties:
+                    start_date:
+                      type: string
+                      format: date
+                    end_date:
+                      type: string
+                      format: date
+      responses:
+        '202':
+          description: Export job created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    description: Unique identifier for the export job
+                  status:
+                    type: string
+                    enum: [pending, processing]
+                    description: Current status of the export job
+                  estimated_completion_time:
+                    type: string
+                    format: date-time
+                    description: Estimated time when the export job will be completed
+        '400':
+          description: Bad request (e.g., invalid date range)
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+  /users/{userId}/data-export/{job_id}:
+    get:
+      summary: Get User Data Export Status and Data
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: job_id
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Export job status and data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                  status:
+                    type: string
+                    enum: [pending, processing, completed, failed]
+                  export_data:
+                    $ref: '#/components/schemas/UserDataExport'
+  /users/{userId}/chart-data:
+    get:
+      summary: Get Chart Data
+      tags:
+        - Users
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChartData'
 
   /invites:
     post:
@@ -459,7 +571,6 @@ paths:
                   $ref: '#/components/schemas/Payment'
         '500':
           description: Internal server error
-
   /payments/{paymentId}:
     get:
       tags:
@@ -512,7 +623,6 @@ paths:
           description: Payment not found
         '500':
           description: Internal server error
-
   /payments/{paymentId}/status:
     put:
       tags:
@@ -865,6 +975,145 @@ paths:
                   totalPages:
                     type: integer
 
+  /admin/dashboard:
+    get:
+      summary: Get Superadmin Dashboard
+      tags:
+        - Admin
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuperadminDashboard'
+  /admin/users:
+    get:
+      summary: List all users
+      tags:
+        - Admin
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: sort
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserDetails'
+  /admin/organisations:
+    get:
+      summary: List all organisations
+      tags:
+        - Admin
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: sort
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrganisationDetails'
+  /admin/payments:
+    get:
+      summary: List all payments
+      tags:
+        - Admin
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: sort
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Payment'
+  /admin/activity-logs:
+    get:
+      summary: List all activity logs
+      tags:
+        - Admin
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: sort
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityLog'
+
+
+
 components:
   securitySchemes:
     BearerAuth:
@@ -899,7 +1148,7 @@ components:
         password:
           type: string
           format: password
-    User:
+    UserResponse:
       type: object
       properties:
         user_id:
@@ -921,12 +1170,11 @@ components:
         password:
           type: string
           format: password
-
     LoginResponse:
       type: object
       properties:
         user:
-          $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/UserResponse'
         token:
           $ref: '#/components/schemas/Token'
     Organization:
@@ -941,22 +1189,40 @@ components:
     ActivityLog:
       type: object
       properties:
-        id:
+        log_id:
+          type: integer
+        user_id:
+          type: integer
+        org_id:
+          type: integer
+        activity_type:
           type: string
-        userId:
+        description:
           type: string
-        action:
+        ip_address:
           type: string
-        timestamp:
+        user_agent:
+          type: string
+        created_at:
           type: string
           format: date-time
     UserSettings:
       type: object
       properties:
-        languageCode:
+        setting_id:
+          type: integer
+        user_id:
+          type: integer
+        key:
           type: string
-        regionCode:
+        value:
+          type: object
+        created_at:
           type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
     Notification:
       type: object
       properties:
@@ -1021,3 +1287,115 @@ components:
           type: array
           items:
             type: string
+
+    UserDetails:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        profile_picture:
+          type: string
+        auth_type:
+          type: string
+        auth_provider:
+          type: string
+        gdpr_consent:
+          type: boolean
+        status:
+          type: string
+        last_login:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    OrganisationDetails:
+      type: object
+      properties:
+        org_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        created_by:
+          type: integer
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    SuperadminDashboard:
+      type: object
+      properties:
+        users:
+          $ref: '#/components/schemas/UserDetails'
+        organisations:
+          $ref: '#/components/schemas/OrganisationDetails'
+        payments:
+          $ref: '#/components/schemas/Payment'
+        activity_logs:
+          $ref: '#/components/schemas/ActivityLog'
+    UserDataExport:
+      type: object
+      properties:
+        user_data:
+          $ref: '#/components/schemas/UserDetails'
+        user_settings:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSettings'
+        organisations:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganisationDetails'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+        activity_logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityLog'
+    RandomData:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        data:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+    ChartData:
+      type: object
+      properties:
+        labels:
+          type: array
+          items:
+            type: string
+        datasets:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              data:
+                type: array
+                items:
+                  type: number

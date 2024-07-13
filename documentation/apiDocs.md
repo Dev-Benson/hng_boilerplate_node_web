@@ -1,3 +1,4 @@
+<!-- npx widdershins documentation/swagger.yaml -o documentation/apiDocs.md --language_tabs javascript -->
 ---
 title: HNG boilerplate node_web v1.0.0
 language_tabs:

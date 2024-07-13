@@ -326,7 +326,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/User'
+                $ref: '#/components/schemas/UserResponse'
     put:
       summary: Update user details
       security:
@@ -342,7 +342,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              $ref: '#/components/schemas/UserResponse'
       responses:
         '200':
           description: User updated successfully
@@ -453,7 +453,6 @@ paths:
                   $ref: '#/components/schemas/Payment'
         '500':
           description: Internal server error
-
   /payments/{paymentId}:
     get:
       tags:
@@ -506,7 +505,6 @@ paths:
           description: Payment not found
         '500':
           description: Internal server error
-
   /payments/{paymentId}/status:
     put:
       tags:
@@ -893,7 +891,7 @@ components:
         password:
           type: string
           format: password
-    User:
+    UserResponse:
       type: object
       properties:
         user_id:
@@ -915,12 +913,11 @@ components:
         password:
           type: string
           format: password
-
     LoginResponse:
       type: object
       properties:
         user:
-          $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/UserResponse'
         token:
           $ref: '#/components/schemas/Token'
     Organization:
@@ -935,22 +932,40 @@ components:
     ActivityLog:
       type: object
       properties:
-        id:
+        log_id:
+          type: integer
+        user_id:
+          type: integer
+        org_id:
+          type: integer
+        activity_type:
           type: string
-        userId:
+        description:
           type: string
-        action:
+        ip_address:
           type: string
-        timestamp:
+        user_agent:
+          type: string
+        created_at:
           type: string
           format: date-time
     UserSettings:
       type: object
       properties:
-        languageCode:
+        setting_id:
+          type: integer
+        user_id:
+          type: integer
+        key:
           type: string
-        regionCode:
+        value:
+          type: object
+        created_at:
           type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
     Notification:
       type: object
       properties:
@@ -1015,3 +1030,115 @@ components:
           type: array
           items:
             type: string
+
+    UserDetails:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        profile_picture:
+          type: string
+        auth_type:
+          type: string
+        auth_provider:
+          type: string
+        gdpr_consent:
+          type: boolean
+        status:
+          type: string
+        last_login:
+          type: string
+          format: date-time
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    OrganisationDetails:
+      type: object
+      properties:
+        org_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        created_by:
+          type: integer
+        status:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+    SuperadminDashboard:
+      type: object
+      properties:
+        users:
+          $ref: '#/components/schemas/UserDetails'
+        organisations:
+          $ref: '#/components/schemas/OrganisationDetails'
+        payments:
+          $ref: '#/components/schemas/Payment'
+        activity_logs:
+          $ref: '#/components/schemas/ActivityLog'
+    UserDataExport:
+      type: object
+      properties:
+        user_data:
+          $ref: '#/components/schemas/UserDetails'
+        user_settings:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSettings'
+        organisations:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrganisationDetails'
+        payments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Payment'
+        activity_logs:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActivityLog'
+    RandomData:
+      type: object
+      properties:
+        id:
+          type: integer
+        user_id:
+          type: integer
+        data:
+          type: object
+        created_at:
+          type: string
+          format: date-time
+    ChartData:
+      type: object
+      properties:
+        labels:
+          type: array
+          items:
+            type: string
+        datasets:
+          type: array
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+              data:
+                type: array
+                items:
+                  type: number
