@@ -31,11 +31,9 @@ tags:
   - name: Content
     description: content endpoints
 servers:
-  - url: "{baseUrl}/api/v1"
+  - url: "/api/v1"
     description: Boilerplate Api server
-    variables:
-      baseUrl:
-        default: ${API_URL}
+
 
 paths:
   /auth/signup:
