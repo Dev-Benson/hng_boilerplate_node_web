@@ -231,6 +231,8 @@ paths:
         '201':
           description: Organization created successfully
     get:
+      tags:
+        - Organisations
       summary: List organizations
       security:
         - BearerAuth: []
@@ -289,6 +291,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/Organization'
     put:
+      tags:
+        - Organisations
       summary: Update an organization
       security:
         - BearerAuth: []
@@ -308,6 +312,8 @@ paths:
         '200':
           description: Organization updated successfully
     delete:
+      tags:
+        - Organisations
       summary: Delete an organization
       security:
         - BearerAuth: []
@@ -342,6 +348,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserResponse'
     put:
+      tags:
+        - Users
       summary: Update user details
       security:
         - BearerAuth: []
@@ -361,6 +369,8 @@ paths:
         '200':
           description: User updated successfully
     delete:
+      tags:
+        - Users
       summary: Delete an User
       security:
         - BearerAuth: []
@@ -783,6 +793,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserSettings'
     put:
+      tags:
+        - Settings
       summary: Update user settings
       security:
         - BearerAuth: []
@@ -821,6 +833,8 @@ paths:
         '200':
           description: Notification sent successfully
     get:
+      tags:
+        - Notifications
       summary: Get notifications
       security:
         - BearerAuth: []
