@@ -24,6 +24,12 @@ tags:
     description: Activity-logs endpoints
   - name: Admin
     description: Admin endpoints
+  - name: Pages
+    description: page endpoints
+  - name: Blog
+    description: Blog endpoints
+  - name: Content
+    description: content endpoints
 servers:
   - url: "{baseUrl}/api/v1"
     description: Boilerplate Api server
@@ -53,6 +59,7 @@ paths:
                 $ref: '#/components/schemas/LoginResponse'
         '400':
           description: Invalid input
+
   /auth/login:
     post:
       tags:
@@ -89,6 +96,7 @@ paths:
           description: Invalid credentials
         '404':
           description: User not found
+
   /auth/forgot-password:
     post:
       tags:
@@ -115,6 +123,7 @@ paths:
           description: User not found
         '500':
           description: Internal server error
+
   /auth/reset-password:
     post:
       tags:
@@ -140,6 +149,7 @@ paths:
           description: Password reset successful
         '400':
           description: Bad Request - Invalid credentials
+
   /auth/change-password:
     post:
       tags:
@@ -166,6 +176,7 @@ paths:
       responses:
         '200':
           description: Password changed successfully
+
   /email/send:
     post:
       tags:
@@ -256,6 +267,7 @@ paths:
                     type: integer
                   totalPages:
                     type: integer
+
   /organizations/{orgId}:
     get:
       tags:
@@ -400,7 +412,8 @@ paths:
           description: Forbidden - Token does not match the requested user ID
         '404':
           description: Not Found - User not found
-
+        '500':
+          description: Internal server error
 
   /users/{userId}/data-export:
     post:
@@ -469,6 +482,7 @@ paths:
           description: Unauthorized
         '500':
           description: Internal server error
+
   /users/{userId}/data-export/{job_id}:
     get:
       summary: Get User Data Export Status and Data
@@ -504,6 +518,7 @@ paths:
                     enum: [pending, processing, completed, failed]
                   export_data:
                     $ref: '#/components/schemas/UserDataExport'
+
   /users/{userId}/chart-data:
     get:
       summary: Get Chart Data
@@ -554,6 +569,7 @@ paths:
           description: Invite created successfully
         '500':
           description: Server error
+
   /invites/{inviteId}/accept:
     post:
       tags:
@@ -603,7 +619,6 @@ paths:
           description: Invalid input
         '500':
           description: Internal server error
-
     get:
       tags:
         - Payment
@@ -619,6 +634,7 @@ paths:
                   $ref: '#/components/schemas/Payment'
         '500':
           description: Internal server error
+
   /payments/{paymentId}:
     get:
       tags:
@@ -641,7 +657,6 @@ paths:
           description: Payment not found
         '500':
           description: Internal server error
-
     put:
       tags:
         - Payment
@@ -671,6 +686,7 @@ paths:
           description: Payment not found
         '500':
           description: Internal server error
+
   /payments/{paymentId}/status:
     put:
       tags:
@@ -729,6 +745,7 @@ paths:
       responses:
         '200':
           description: Language preference updated successfully
+
   /settings/region:
     put:
       tags:
@@ -750,6 +767,7 @@ paths:
       responses:
         '200':
           description: Region preference updated successfully
+
   /settings:
     get:
       tags:
@@ -864,6 +882,7 @@ paths:
           description: Invalid input
         '500':
           description: Internal server error
+
   /ai/analyze-sentiment:
     post:
       tags:
@@ -896,6 +915,7 @@ paths:
           description: Invalid input
         '500':
           description: Internal server error
+
   /ai/extract-entities:
     post:
       tags:
@@ -934,6 +954,7 @@ paths:
           description: Invalid input
         '500':
           description: Internal server error
+
   /ai/extract-keywords:
     post:
       tags:
@@ -1035,6 +1056,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/SuperadminDashboard'
+
   /admin/users:
     get:
       summary: List all users
@@ -1066,6 +1088,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/UserDetails'
+
   /admin/organisations:
     get:
       summary: List all organisations
@@ -1097,6 +1120,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/OrganisationDetails'
+
   /admin/payments:
     get:
       summary: List all payments
@@ -1128,6 +1152,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Payment'
+
   /admin/activity-logs:
     get:
       summary: List all activity logs
@@ -1160,7 +1185,234 @@ paths:
                 items:
                   $ref: '#/components/schemas/ActivityLog'
 
+  /pages:
+    get:
+      summary: Get page content
+      tags:
+        - Pages
+      parameters:
+        - in: query
+          name: pageName
+          required: true
+          schema:
+            type: string
+            enum: [privacy-policy, about-us, contact-us]
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+        '404':
+          description: Page not found
+        '500':
+          description: Internal server error
 
+  /users/{userId}/settings:
+    get:
+      summary: Get user settings
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSettings'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - User doesn't have permission to access these settings
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+    put:
+      summary: Update user settings
+      tags:
+        - Users
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSettings'
+      responses:
+        '200':
+          description: Settings updated successfully
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - User doesn't have permission to update these settings
+        '404':
+          description: User not found
+        '500':
+          description: Internal server error
+
+  /content:
+    post:
+      summary: Create new content
+      tags:
+        - Content
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentInput'
+      responses:
+        '201':
+          description: Content created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - User doesn't have permission to create content
+        '500':
+          description: Internal server error
+
+  /content/{contentId}:
+    get:
+      summary: Get content by ID
+      tags:
+        - Content
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '404':
+          description: Content not found
+        '500':
+          description: Internal server error
+    put:
+      summary: Update content
+      tags:
+        - Content
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContentInput'
+      responses:
+        '200':
+          description: Content updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Content'
+        '400':
+          description: Invalid input
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - User doesn't have permission to update this content
+        '404':
+          description: Content not found
+        '500':
+          description: Internal server error
+    delete:
+      summary: Delete content
+      tags:
+        - Content
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: contentId
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Content deleted successfully
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden - User doesn't have permission to delete this content
+        '404':
+          description: Content not found
+        '500':
+          description: Internal server error
+
+  /blog:
+    get:
+      summary: Get blog posts
+      tags:
+        - Blog
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/BlogPost'
+                  totalPages:
+                    type: integer
+                  currentPage:
+                    type: integer
+        '500':
+          description: Internal server error
 
 components:
   securitySchemes:
@@ -1257,20 +1509,15 @@ components:
     UserSettings:
       type: object
       properties:
-        setting_id:
+        userId:
           type: integer
-        user_id:
-          type: integer
-        key:
+        emailNotifications:
+          type: boolean
+        theme:
           type: string
-        value:
-          type: object
-        created_at:
+          enum: [light, dark]
+        language:
           type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
     Notification:
       type: object
       properties:
@@ -1335,7 +1582,6 @@ components:
           type: array
           items:
             type: string
-
     UserDetails:
       type: object
       properties:
@@ -1447,4 +1693,52 @@ components:
                 type: array
                 items:
                   type: number
-
+    Page:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+    ContentInput:
+      type: object
+      properties:
+        title:
+          type: string
+        body:
+          type: string
+        authorId:
+          type: integer
+        type:
+          type: string
+          enum: [article, blog_post, page]
+        status:
+          type: string
+          enum: [draft, published]
+    Content:
+      allOf:
+        - $ref: '#/components/schemas/ContentInput'
+        - type: object
+          properties:
+            id:
+              type: integer
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+    BlogPost:
+      allOf:
+        - $ref: '#/components/schemas/Content'
+        - type: object
+          properties:
+            excerpt:
+              type: string
+            tags:
+              type: array
+              items:
+                type: string
